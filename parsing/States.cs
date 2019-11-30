@@ -4,8 +4,9 @@ using System.Linq;
 
 namespace lrCalculator
 {
-    class States
+    public class States
     {
+        public static int gl=0;
         public States(int stateNo,CompositeGrammarToken lrItem,int dotPointer,List<KeyValuePair<CompositeGrammarToken,int>> canonicalCollections,List<KeyValuePair<int,GrammarToken>> transisions)
         {
 
@@ -24,7 +25,7 @@ namespace lrCalculator
         public List<KeyValuePair<int, GrammarToken>> Transisions { get; }
     
 
-        public static List<States> spreadGrammer(GrammarToken start,Dictionary<GrammarToken,List<CompositeGrammarToken>> grammar){
+        public static List<States> GetStates(GrammarToken start,Dictionary<GrammarToken,List<CompositeGrammarToken>> grammar){
 
             // listing of all states
             List<States> statesList=new List<States>();
@@ -44,60 +45,71 @@ namespace lrCalculator
 
             while (queue.Count>0)
             {
+                gl++;
+                if(gl>1000)break;
+                
                 var currentNode=queue.Dequeue();
                 // A.A,1
                 List<KeyValuePair<CompositeGrammarToken,int>> canonicalCollections=new List<KeyValuePair<CompositeGrammarToken, int>>();
                 // state,(dot going over=> .AB=>A.B => A)
                 List<KeyValuePair<int,GrammarToken>> transisionList=new List<KeyValuePair<int, GrammarToken>>();
-                canonicalCollections=getCanonicalCollections(currentNode,grammar);                
+                canonicalCollections=GetCanonicalCollections(currentNode,grammar);                
 
                 if(currentNode.Value<currentNode.Key.Length){
 
                     foreach (var canonicalItem in canonicalCollections)
                     {   
                         var gotoState=0;
-                        if(!seen.ContainsKey(new KeyValuePair<int, int>(canonicalItem.Key.GetHashCode(),canonicalItem.Value+1))){
+                        if(!seen.ContainsKey(new KeyValuePair<int, int>(canonicalItem.Key.HashCode,canonicalItem.Value+1))){
                             queue.Enqueue(new KeyValuePair<CompositeGrammarToken, int>(canonicalItem.Key,canonicalItem.Value+1));
                             state++;
                             gotoState=state;
-                            seen.Add(new KeyValuePair<int, int>(canonicalItem.Key.GetHashCode(),canonicalItem.Value+1),gotoState);
+                            seen.Add(new KeyValuePair<int, int>(canonicalItem.Key.HashCode,canonicalItem.Value+1),gotoState);
                         }else
                         {
-                            gotoState=seen.GetValueOrDefault(new KeyValuePair<int, int>(canonicalItem.Key.GetHashCode(),canonicalItem.Value+1));
+                            gotoState=seen.GetValueOrDefault(new KeyValuePair<int, int>(canonicalItem.Key.HashCode,canonicalItem.Value+1));
                         }
 
                         transisionList.Add(new KeyValuePair<int,GrammarToken>(gotoState,canonicalItem.Key.Get(canonicalItem.Value)));
                     }
                 }
 
-                int stateNow=seen.GetValueOrDefault(new KeyValuePair<int, int>(currentNode.Key.GetHashCode(),currentNode.Value));
+                int stateNow=seen.GetValueOrDefault(new KeyValuePair<int, int>(currentNode.Key.HashCode,currentNode.Value));
                 statesList.Add(new States(stateNow,currentNode.Key,currentNode.Value,canonicalCollections,transisionList));
             }
             return statesList;
         }
 
 
-        static List<KeyValuePair<CompositeGrammarToken,int>> getCanonicalCollections(KeyValuePair<CompositeGrammarToken,int> node,Dictionary<GrammarToken,List<CompositeGrammarToken>> grammer){
+        static List<KeyValuePair<CompositeGrammarToken,int>> GetCanonicalCollections(KeyValuePair<CompositeGrammarToken,int> node,Dictionary<GrammarToken,List<CompositeGrammarToken>> grammer){
 
             List<KeyValuePair<CompositeGrammarToken,int>> canonicalCollections=new List<KeyValuePair<CompositeGrammarToken, int>>();
             Queue<KeyValuePair<CompositeGrammarToken,int>> nonTerminal=new Queue<KeyValuePair<CompositeGrammarToken,int>>();
+            Dictionary<KeyValuePair<int,int>,bool> seen=new Dictionary<KeyValuePair<int, int>, bool>();
             
             nonTerminal.Enqueue(new KeyValuePair<CompositeGrammarToken, int>(node.Key,node.Value));
-
+            
             while (nonTerminal.Count>0)
             {
+                gl++;
+                if(gl>1000)break;
+                
+
                 var closure=nonTerminal.Dequeue();
+                seen.TryAdd(new KeyValuePair<int, int>(closure.Key.HashCode,closure.Value),true);
+                
                 canonicalCollections.Add(new KeyValuePair<CompositeGrammarToken, int>(closure.Key,closure.Value));
                 
                 if(closure.Value>=closure.Key.Length)continue;
 
                 var rightOfDot=closure.Key.Get(closure.Value);
 
-                if(!grammer.ContainsKey(rightOfDot))continue;
+                if(rightOfDot.IsTerminal)continue;
 
                 foreach (var item in grammer[rightOfDot])
                     {  
-                        nonTerminal.Enqueue(new KeyValuePair<CompositeGrammarToken, int>(item,0));
+                        if(!seen.ContainsKey(new KeyValuePair<int, int>(item.HashCode,0)))
+                            nonTerminal.Enqueue(new KeyValuePair<CompositeGrammarToken, int>(item,0));
                     }
             }
             return canonicalCollections;

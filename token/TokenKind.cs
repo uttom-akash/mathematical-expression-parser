@@ -2,10 +2,28 @@ namespace lrCalculator
 {
     public enum TokenKind
     {
-        Expression,
+        
         S,
         A,
         a,
-        b
+        b,
+
+
+        // calculator
+        Expression,
+        Term,
+        Factor,
+        Add_op,
+        Mult_op,
+        
+        // terminal
+        Id,
+        Number,
+        LeftParenthesis,
+        RightParenthesis,
+        Plus,
+        Minus,
+        Star,
+        Slash
     }
 }

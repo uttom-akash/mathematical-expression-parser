@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 namespace lrCalculator{
-    class ParsingTable
+    public class ParsingTable
     {
         public  List<Dictionary<GrammarToken,ParseAction>> _action;
         public  List<Dictionary<GrammarToken,int>> _goto;
@@ -26,7 +26,7 @@ namespace lrCalculator{
                 if(state.Leaf){
                     foreach (var token in Grammar.terminalTokens)
                     {
-                        _action[stateNo][token]=new ParseAction('r', Grammar.NumberedGrammar.GetValueOrDefault(state.LrItem.GetHashCode()));
+                        _action[stateNo][token]=new ParseAction('r', Grammar.NumberedGrammar.GetValueOrDefault(state.LrItem.HashCode));
                     }
                     continue;
                 }

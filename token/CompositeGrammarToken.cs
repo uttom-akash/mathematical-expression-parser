@@ -10,7 +10,9 @@ namespace lrCalculator
         {
             TokenList = tokenList;
             Length=tokenList.Count;
+            HashCode=this.GetHashCode();
         }
+        public int HashCode {get;}
         public int Length {get;}
         public List<GrammarToken> TokenList { get; }
         public GrammarToken Get(int index){
@@ -20,7 +22,7 @@ namespace lrCalculator
             string ret="";
             foreach (var item in TokenList)
             {
-                ret+=item.Value;
+                ret+=" "+item.Value;
             }
             return ret;
         }
