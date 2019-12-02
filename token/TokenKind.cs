@@ -24,6 +24,7 @@ namespace lrCalculator
         Plus,
         Minus,
         Star,
-        Slash
+        Slash,
+        Dollar
     }
 }

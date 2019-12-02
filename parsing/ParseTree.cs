@@ -8,5 +8,6 @@ namespace lrCalculator{
 
         public ParsingTable ParsingTable { get; }
 
-    }
+
+    } 
 }

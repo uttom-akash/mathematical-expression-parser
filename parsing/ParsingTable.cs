@@ -18,13 +18,13 @@ namespace lrCalculator{
 
 
         public  void createParsingTable(List<States> states){
-            init(states,Grammar.grammarDictionary);
+            init(states,Grammar.GrammarDictionary);
 
             foreach (var state in states)
             {
                 int stateNo=state.StateNo;
                 if(state.Leaf){
-                    foreach (var token in Grammar.terminalTokens)
+                    foreach (var token in Grammar.TerminalTokens)
                     {
                         _action[stateNo][token]=new ParseAction('r', Grammar.NumberedGrammar.GetValueOrDefault(state.LrItem.HashCode));
                     }
@@ -53,13 +53,14 @@ namespace lrCalculator{
             {
                 var stateAction=new Dictionary<GrammarToken, ParseAction>();
                 var stateGoto=  new Dictionary<GrammarToken, int>();
+                
 
-                foreach (var token in Grammar.terminalTokens)
+                foreach (var token in Grammar.TerminalTokens)
                 {
                     stateAction.Add(token,new ParseAction('b',-1));
                 }
 
-                foreach (var token in Grammar.nonTerminalTokens)
+                foreach (var token in Grammar.NonTerminalTokens)
                 {
                     stateGoto.Add(token,-1);
                 }
