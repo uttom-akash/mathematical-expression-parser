@@ -1,18 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace lrCalculator{
     public class ParsingTable
     {
-        public  List<Dictionary<GrammarToken,ParseAction>> _action;
-        public  List<Dictionary<GrammarToken,int>> _goto;
+        public  List<Dictionary<TokenKind,ParseAction>> _action;
+        public  List<Dictionary<TokenKind,int>> _goto;
 
         public Grammar Grammar { get; }
 
         public ParsingTable(Grammar grammar)
         {
-            _action=new List<Dictionary<GrammarToken,ParseAction>>();
-            _goto=new List<Dictionary<GrammarToken, int>>();
+            _action=new List<Dictionary<TokenKind,ParseAction>>();
+            _goto=new List<Dictionary<TokenKind, int>>();
             Grammar = grammar;
         }
 
@@ -26,7 +27,8 @@ namespace lrCalculator{
                 if(state.Leaf){
                     foreach (var token in Grammar.TerminalTokens)
                     {
-                        _action[stateNo][token]=new ParseAction('r', Grammar.NumberedGrammar.GetValueOrDefault(state.LrItem.HashCode));
+                        var reducedLeftHandSide=Grammar.NumberedGrammar.GetValueOrDefault(state.LrItem.HashCode);
+                        _action[stateNo][token.Kind]=new ParseAction('r', reducedLeftHandSide);
                     }
                     continue;
                 }
@@ -37,9 +39,9 @@ namespace lrCalculator{
                     int dest=transision.Key;
 
                     if(token.IsTerminal){
-                        _action[stateNo][token]=new ParseAction('s',dest);
+                        _action[stateNo][token.Kind]=new ParseAction('s',dest);
                     }else{
-                        _goto[stateNo][token]=dest;
+                        _goto[stateNo][token.Kind]=dest;
                     }
                 }
             }
@@ -51,18 +53,18 @@ namespace lrCalculator{
             // initialize parsing table 
             foreach (var item in states)
             {
-                var stateAction=new Dictionary<GrammarToken, ParseAction>();
-                var stateGoto=  new Dictionary<GrammarToken, int>();
+                var stateAction=new Dictionary<TokenKind, ParseAction>();
+                var stateGoto=  new Dictionary<TokenKind, int>();
                 
 
                 foreach (var token in Grammar.TerminalTokens)
                 {
-                    stateAction.Add(token,new ParseAction('b',-1));
+                    stateAction.Add(token.Kind,new ParseAction('b',-1));
                 }
 
                 foreach (var token in Grammar.NonTerminalTokens)
                 {
-                    stateGoto.Add(token,-1);
+                    stateGoto.Add(token.Kind,-1);
                 }
                 _action.Add(stateAction);
                 _goto.Add(stateGoto);       
@@ -74,6 +76,9 @@ namespace lrCalculator{
 
     public class ParseAction
         {
+            public ParseAction(char action):this(action,0){
+
+            }
             public ParseAction(char action,int value)
             {
                 Action = action;

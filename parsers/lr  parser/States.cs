@@ -56,21 +56,29 @@ namespace lrCalculator
                 canonicalCollections=GetCanonicalCollections(currentNode,grammar);                
 
                 if(currentNode.Value<currentNode.Key.Length){
-
+                    Dictionary<GrammarToken,int> seenTransisionOfNode=new Dictionary<GrammarToken, int>();
                     foreach (var canonicalItem in canonicalCollections)
                     {   
+                        var transisionEvent=canonicalItem.Key.Get(canonicalItem.Value);
                         var gotoState=0;
                         if(!seen.ContainsKey(new KeyValuePair<int, int>(canonicalItem.Key.HashCode,canonicalItem.Value+1))){
                             queue.Enqueue(new KeyValuePair<CompositeGrammarToken, int>(canonicalItem.Key,canonicalItem.Value+1));
-                            state++;
-                            gotoState=state;
+                            
+                            if(seenTransisionOfNode.ContainsKey(transisionEvent))
+                                seenTransisionOfNode.TryGetValue(transisionEvent,out gotoState);
+                            else
+                                gotoState=++state;
+                                
                             seen.Add(new KeyValuePair<int, int>(canonicalItem.Key.HashCode,canonicalItem.Value+1),gotoState);
                         }else
                         {
                             gotoState=seen.GetValueOrDefault(new KeyValuePair<int, int>(canonicalItem.Key.HashCode,canonicalItem.Value+1));
                         }
-
-                        transisionList.Add(new KeyValuePair<int,GrammarToken>(gotoState,canonicalItem.Key.Get(canonicalItem.Value)));
+                        
+                        if(!seenTransisionOfNode.ContainsKey(transisionEvent))
+                            seenTransisionOfNode.Add(transisionEvent,gotoState);
+                        
+                        transisionList.Add(new KeyValuePair<int,GrammarToken>(gotoState,transisionEvent));
                     }
                 }
 
@@ -88,7 +96,7 @@ namespace lrCalculator
             Dictionary<KeyValuePair<int,int>,bool> seen=new Dictionary<KeyValuePair<int, int>, bool>();
             
             nonTerminal.Enqueue(new KeyValuePair<CompositeGrammarToken, int>(node.Key,node.Value));
-            
+            seen.TryAdd(new KeyValuePair<int, int>(node.Key.HashCode,node.Value),true);
             while (nonTerminal.Count>0)
             {
                 gl++;
@@ -96,9 +104,9 @@ namespace lrCalculator
                 
 
                 var closure=nonTerminal.Dequeue();
-                seen.TryAdd(new KeyValuePair<int, int>(closure.Key.HashCode,closure.Value),true);
                 
                 canonicalCollections.Add(new KeyValuePair<CompositeGrammarToken, int>(closure.Key,closure.Value));
+                
                 
                 if(closure.Value>=closure.Key.Length)continue;
 
@@ -109,7 +117,10 @@ namespace lrCalculator
                 foreach (var item in grammer[rightOfDot])
                     {  
                         if(!seen.ContainsKey(new KeyValuePair<int, int>(item.HashCode,0)))
-                            nonTerminal.Enqueue(new KeyValuePair<CompositeGrammarToken, int>(item,0));
+                            {
+                                nonTerminal.Enqueue(new KeyValuePair<CompositeGrammarToken, int>(item,0));
+                                seen.TryAdd(new KeyValuePair<int, int>(item.HashCode,0),true);
+                            } 
                     }
             }
             return canonicalCollections;

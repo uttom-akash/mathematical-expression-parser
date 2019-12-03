@@ -1,14 +1,6 @@
-namespace lrCalculator
-{
-    class Token
+namespace lrCalculator{
+    public abstract class Token
     {
-        public Token(TokenKind kind,int value)
-        {
-            Kind = kind;
-            Value = value;
-        }
-
-        public TokenKind Kind { get; }
-        public int Value { get; }
+        public abstract TokenKind Kind { get;}
     }
 }

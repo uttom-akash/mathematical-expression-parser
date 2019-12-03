@@ -39,16 +39,49 @@ namespace lrCalculator
             else 
                 return GrammarList;
 
+            // stanford grammar
+            // GrammarList.Add(new Production(Expression,new CompositeGrammarToken(new List<GrammarToken>{Term})));
+            // GrammarList.Add(new Production(Expression,new CompositeGrammarToken(new List<GrammarToken>{Term,Plus,Expression})));
             
-            GrammarList.Add(new Production(Expression,new CompositeGrammarToken(new List<GrammarToken>{Term})));
-            GrammarList.Add(new Production(Expression,new CompositeGrammarToken(new List<GrammarToken>{Expression,Add_op,Term})));
-            GrammarList.Add(new Production(Expression,new CompositeGrammarToken(new List<GrammarToken>{LeftParenthesis,Expression,RightParenthesis})));
+            // GrammarList.Add(new Production(Term,new CompositeGrammarToken(new List<GrammarToken>{Number,Star,Term})));
+            // GrammarList.Add(new Production(Term,new CompositeGrammarToken(new List<GrammarToken>{Number})));
+            // GrammarList.Add(new Production(Term,new CompositeGrammarToken(new List<GrammarToken>{LeftParenthesis,Expression,RightParenthesis})));
+            
 
-            GrammarList.Add(new Production(Term,new CompositeGrammarToken(new List<GrammarToken>{Number})));
+            GrammarList.Add(new Production(Accepted,new CompositeGrammarToken(new List<GrammarToken>{Expression})));
+            // book grammar
+            GrammarList.Add(new Production(Expression,new CompositeGrammarToken(new List<GrammarToken>{Term})));
+            GrammarList.Add(new Production(Expression,new CompositeGrammarToken(new List<GrammarToken>{Term,Add_op,Expression})));
+
+            GrammarList.Add(new Production(Term,new CompositeGrammarToken(new List<GrammarToken>{Factor})));
+            GrammarList.Add(new Production(Term,new CompositeGrammarToken(new List<GrammarToken>{Factor,Mult_op,Term})));
+
+
+            GrammarList.Add(new Production(Factor,new CompositeGrammarToken(new List<GrammarToken>{Number})));
+            GrammarList.Add(new Production(Factor,new CompositeGrammarToken(new List<GrammarToken>{LeftParenthesis,Expression,RightParenthesis})));
             
+
+
+
+
+
+            // my grammmar
+            // GrammarList.Add(new Production(Expression,new CompositeGrammarToken(new List<GrammarToken>{Term})));
+            // GrammarList.Add(new Production(Expression,new CompositeGrammarToken(new List<GrammarToken>{Expression,Add_op,Term})));
+            // GrammarList.Add(new Production(Expression,new CompositeGrammarToken(new List<GrammarToken>{LeftParenthesis,Expression,RightParenthesis})));
+
+            // GrammarList.Add(new Production(Term,new CompositeGrammarToken(new List<GrammarToken>{Factor})));
+
+            // GrammarList.Add(new Production(Factor,new CompositeGrammarToken(new List<GrammarToken>{Number})));
+            // GrammarList.Add(new Production(Factor,new CompositeGrammarToken(new List<GrammarToken>{Factor,Mult_op,Number})));
+            
+            // common terminal
             GrammarList.Add(new Production(Add_op,new CompositeGrammarToken(new List<GrammarToken>{Plus})));
             GrammarList.Add(new Production(Add_op,new CompositeGrammarToken(new List<GrammarToken>{Minus})));
             
+            
+            GrammarList.Add(new Production(Mult_op,new CompositeGrammarToken(new List<GrammarToken>{Star})));
+            GrammarList.Add(new Production(Mult_op,new CompositeGrammarToken(new List<GrammarToken>{Slash})));
             
             return GrammarList;   
         }
@@ -72,7 +105,7 @@ namespace lrCalculator
         private Dictionary<int,int> GetGrammarNumbering(){
             Dictionary<int,int> GrammarNumber=new Dictionary<int, int>();
             
-            int index=1;
+            int index=0;
             foreach (var grammar in GrammarList)
             {
                 GrammarNumber.TryAdd(grammar.RightHandSide.HashCode,index); 
@@ -103,6 +136,7 @@ namespace lrCalculator
 
 
         // Grammar token
+        private GrammarToken Accepted=new GrammarToken(TokenKind.Accepted,false,"accepted");
         private GrammarToken Expression=new GrammarToken(TokenKind.Expression,false,"exp");
         private GrammarToken Term=new GrammarToken(TokenKind.Term,false,"term");
         private GrammarToken Factor=new GrammarToken(TokenKind.Factor,false,"factor");

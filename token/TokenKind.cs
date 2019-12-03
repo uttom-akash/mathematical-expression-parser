@@ -25,6 +25,8 @@ namespace lrCalculator
         Minus,
         Star,
         Slash,
-        Dollar
+        Dollar,
+        Accepted,
+        Invalid
     }
 }

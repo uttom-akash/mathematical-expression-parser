@@ -1,6 +1,7 @@
 namespace lrCalculator{
-    public class GrammarToken
+    public class GrammarToken:Token
     {
+        
         public GrammarToken(TokenKind kind,bool isTerminal,string value)
         {
             Kind = kind;
@@ -8,8 +9,9 @@ namespace lrCalculator{
             Value = value;
         }
 
-        public TokenKind Kind { get; }
-        public bool IsTerminal { get; }
-        public string Value { get; }
+
+        public override TokenKind Kind {get;}
+        public bool IsTerminal { get;set;}
+        public object Value { get;set;}        
     }
 }
