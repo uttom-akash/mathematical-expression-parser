@@ -13,6 +13,7 @@ namespace lrCalculator{
             Tokens = tokens;
             Grammar = grammar;
             
+
             position =0;
             length=Tokens.Count;
 
@@ -22,7 +23,8 @@ namespace lrCalculator{
         private List<SyntaxToken> Tokens { get; }
         public Grammar Grammar { get; }
 
-        Stack<SyntaxToken> rememberSyntax=new Stack<SyntaxToken>();
+        
+        Stack<Syntax> rememberSyntax=new Stack<Syntax>();
         Stack<int> rememberState=new Stack<int>();
 
 
@@ -31,9 +33,11 @@ namespace lrCalculator{
                 return Tokens.ElementAt(position+offset);
             return new SyntaxToken(TokenKind.Invalid);
         }
+
         private SyntaxToken CurrentToken=>Peek(0);
         private void Next()=>position++;
-        public void generateTree(){
+        
+        public Syntax generateTree(){
             var actionTable=ParsingTable._action;
             var gotoTable=ParsingTable._goto;
 
@@ -45,6 +49,7 @@ namespace lrCalculator{
                 var token=CurrentToken;    
                 var currentState=rememberState.Peek();
                 var action=actionTable[currentState][token.Kind];
+                
                 Console.WriteLine("--------------------------------------------------------------------------");
                 Console.WriteLine($"position :{position} token:{token.Kind} state:{currentState} ");
                 printStack();
@@ -55,10 +60,11 @@ namespace lrCalculator{
                 {
                     case 's': ShiftAction(token,action.Value);break;
                     case 'r': ReduceAction(token,action.Value,gotoTable);break;
-                    case 'a': AcceptedAction();break;
-                    default: Error() ;break;
+                    case 'a': AcceptedAction();return rememberSyntax.Pop();
+                    default: Error() ;return rememberSyntax.Pop();
                 }
             }
+            return rememberSyntax.Pop();
 
         }
 
@@ -67,14 +73,17 @@ namespace lrCalculator{
         public void ShiftAction(SyntaxToken token,int state){
             Console.WriteLine("Shift");
 
-            rememberSyntax.Push(token);
+            rememberSyntax.Push(new Syntax(token.Kind,token.Value));
             rememberState.Push(state);
             Next();
         }
+    
 
         private void ReduceAction(SyntaxToken token, int production, List<Dictionary<TokenKind, int>> gotoTable)
         {
             Console.WriteLine("Reduce");
+
+            
             
             if(production<0)
             {
@@ -86,18 +95,64 @@ namespace lrCalculator{
             var rightHandSide=grammar.RightHandSide.Length;
             var leftHandSide=grammar.LeftHandSide;
 
+            if(leftHandSide.Kind==TokenKind.Accepted)
+                {
+                    AcceptedAction();
+                    return ;
+                }
+            
+
+            List<Syntax> reducableList=new List<Syntax>();
             while (rightHandSide>0)
             {
                 rememberState.Pop();
-                rememberSyntax.Pop();
+                var reducable=rememberSyntax.Pop();
+                reducableList.Add(reducable);
+                
                 rightHandSide--;
             }
+            reducableList.Reverse();
+            var reducerIterator=reducableList.AsEnumerable().GetEnumerator();    
+
             Console.WriteLine($"{leftHandSide.Kind} ==> {grammar.RightHandSide.toString()}");
-            rememberSyntax.Push(new Syntax(leftHandSide.Kind));
-            if(leftHandSide.Kind==TokenKind.Accepted)
-                AcceptedAction();
+            
+            rememberSyntax.Push(Reduce(leftHandSide,reducerIterator));    
             var previuosState=rememberState.Peek();
             rememberState.Push(gotoTable[previuosState][leftHandSide.Kind]);
+        }
+
+        public Syntax Reduce(SyntaxToken token,IEnumerator<Syntax> reducerIterator){
+            reducerIterator.MoveNext();
+            switch (token.Kind)
+            {
+                case TokenKind.Add_op:return new AddOpSyntax(reducerIterator.Current);
+                case TokenKind.Mult_op :return new MultiOpSyntax(reducerIterator.Current);
+                case TokenKind.Factor:{ 
+                    var l=reducerIterator.Current;reducerIterator.MoveNext();
+                    var m=reducerIterator.Current;reducerIterator.MoveNext();
+                    var r=reducerIterator.Current;
+                    if(m==null)
+                        return new FactorSyntax(l);     
+                    return new FactorSyntax(l,m,r);
+                };
+                case TokenKind.Term: {
+                    var l=reducerIterator.Current;reducerIterator.MoveNext();
+                    var m=reducerIterator.Current;reducerIterator.MoveNext();
+                    var r=reducerIterator.Current;
+                   
+                    return new TermSyntax(l,m,r);
+                };
+                case TokenKind.Expression:{
+                    var l=reducerIterator.Current;reducerIterator.MoveNext();
+                    var m=reducerIterator.Current;reducerIterator.MoveNext();
+                    var r=reducerIterator.Current;
+                    return new ExpressionSyntax(l,m,r);
+                };
+                default: {
+                    Error();
+                    return new Syntax(TokenKind.Invalid);
+                }
+            }
         }
 
         public void AcceptedAction(){
@@ -133,6 +188,9 @@ namespace lrCalculator{
             }
             Console.WriteLine("========");
         }
+
+
+        
         
     }
 }

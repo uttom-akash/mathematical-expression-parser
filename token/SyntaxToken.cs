@@ -2,10 +2,8 @@ namespace lrCalculator
 {
     public class SyntaxToken :Token
     {
-        public SyntaxToken(TokenKind kind)
-        {
-            Kind=kind;
-        }
+        public SyntaxToken(TokenKind kind):this(kind,null)
+        {}
 
         public SyntaxToken(TokenKind kind,object value){
             Kind = kind;
@@ -13,6 +11,6 @@ namespace lrCalculator
         }
 
         public override TokenKind Kind {get;}
-        public object Value { get;set;}
+        public override object Value {get;}
     }
 }

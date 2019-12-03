@@ -1,17 +1,12 @@
 namespace lrCalculator{
-    public class GrammarToken:Token
+    public class GrammarToken:SyntaxToken
     {
         
-        public GrammarToken(TokenKind kind,bool isTerminal,string value)
+        public GrammarToken(TokenKind kind,bool isTerminal,string value):base(kind,value)
         {
-            Kind = kind;
             IsTerminal = isTerminal;
-            Value = value;
         }
 
-
-        public override TokenKind Kind {get;}
-        public bool IsTerminal { get;set;}
-        public object Value { get;set;}        
+        public bool IsTerminal { get;set;}        
     }
 }
