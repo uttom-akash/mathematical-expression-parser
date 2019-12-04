@@ -27,6 +27,8 @@ namespace lrCalculator
         Slash,
         Dollar,
         Accepted,
-        Invalid
+        Invalid,
+        EndOfFile,
+        WhiteSpace
     }
 }

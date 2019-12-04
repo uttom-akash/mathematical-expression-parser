@@ -7,6 +7,9 @@ namespace lrCalculator{
     {
         int position;
         int length=0;
+         Stack<Syntax> rememberSyntax=new Stack<Syntax>();
+        Stack<int> rememberState=new Stack<int>();
+
         public TreeGenerator(ParsingTable parsingTable,List<SyntaxToken> tokens,Grammar grammar)
         {
             ParsingTable = parsingTable;
@@ -23,15 +26,11 @@ namespace lrCalculator{
         private List<SyntaxToken> Tokens { get; }
         public Grammar Grammar { get; }
 
-        
-        Stack<Syntax> rememberSyntax=new Stack<Syntax>();
-        Stack<int> rememberState=new Stack<int>();
-
 
         private SyntaxToken Peek(int offset){
             if(position+offset<length)
                 return Tokens.ElementAt(position+offset);
-            return new SyntaxToken(TokenKind.Invalid);
+            return new SyntaxToken(TokenKind.Invalid,null);
         }
 
         private SyntaxToken CurrentToken=>Peek(0);
@@ -49,13 +48,10 @@ namespace lrCalculator{
                 var token=CurrentToken;    
                 var currentState=rememberState.Peek();
                 var action=actionTable[currentState][token.Kind];
-                
-                Console.WriteLine("--------------------------------------------------------------------------");
-                Console.WriteLine($"position :{position} token:{token.Kind} state:{currentState} ");
-                printStack();
-
-
-
+    
+                if(ShowStats.showParsingLive){
+                    Print.PrintStack($"position :{position} token:{token.Kind} state:{currentState}",rememberSyntax,rememberState);
+                }
                 switch (action.Action)
                 {
                     case 's': ShiftAction(token,action.Value);break;
@@ -71,7 +67,9 @@ namespace lrCalculator{
         
 
         public void ShiftAction(SyntaxToken token,int state){
-            Console.WriteLine("Shift");
+            if(ShowStats.showParsingLive){
+                Print.PrintHeader("shift:");
+            }
 
             rememberSyntax.Push(new Syntax(token.Kind,token.Value));
             rememberState.Push(state);
@@ -81,10 +79,10 @@ namespace lrCalculator{
 
         private void ReduceAction(SyntaxToken token, int production, List<Dictionary<TokenKind, int>> gotoTable)
         {
-            Console.WriteLine("Reduce");
+            if(ShowStats.showParsingLive){
+                Print.PrintHeader("reduce:");
+            }
 
-            
-            
             if(production<0)
             {
                 Error();
@@ -111,17 +109,18 @@ namespace lrCalculator{
                 
                 rightHandSide--;
             }
-            reducableList.Reverse();
-            var reducerIterator=reducableList.AsEnumerable().GetEnumerator();    
-
-            Console.WriteLine($"{leftHandSide.Kind} ==> {grammar.RightHandSide.toString()}");
-            
-            rememberSyntax.Push(Reduce(leftHandSide,reducerIterator));    
+            if(ShowStats.showParsingLive){
+                Print.PrintLine($"{leftHandSide.Kind} ==> {grammar.RightHandSide.toString()}");
+            }
+            rememberSyntax.Push(Reduce(leftHandSide,reducableList));    
             var previuosState=rememberState.Peek();
             rememberState.Push(gotoTable[previuosState][leftHandSide.Kind]);
         }
 
-        public Syntax Reduce(SyntaxToken token,IEnumerator<Syntax> reducerIterator){
+        public Syntax Reduce(SyntaxToken token,List<Syntax> reducableList){
+            reducableList.Reverse();
+            var reducerIterator=reducableList.AsEnumerable().GetEnumerator();    
+            
             reducerIterator.MoveNext();
             switch (token.Kind)
             {
@@ -156,39 +155,19 @@ namespace lrCalculator{
         }
 
         public void AcceptedAction(){
-            Console.WriteLine("===================");
-            Console.WriteLine("||                ||");
-            Console.WriteLine("||  Accepted      ||");
-            Console.WriteLine("||                ||");
-            Console.WriteLine("===================");
+            Print.PrintAcceptedHeader();
             Next();
         }
 
         public void Error(){
-            Console.WriteLine("===================");
-            Console.WriteLine("||                ||");
-            Console.WriteLine("||  Error      ||");
-            Console.WriteLine("||                ||");
-            Console.WriteLine("===================");
+            Console.WriteLine(" ________________");
+            Console.WriteLine("|                │");
+            Console.WriteLine("|     Error      │");
+            Console.WriteLine("|________________|");
         }
 
 
-        public void printStack(){
-
-            Console.WriteLine("========");
-            foreach (var item in rememberState.ToList())
-            {
-                Console.WriteLine($"|{item}|");           
-            }
-
-            Console.WriteLine("========");
-            foreach (var item in rememberSyntax.ToList())
-            {
-                Console.WriteLine($"|{item.Kind}|");           
-            }
-            Console.WriteLine("========");
-        }
-
+        
 
         
         
