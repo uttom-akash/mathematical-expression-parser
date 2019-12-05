@@ -126,12 +126,19 @@ namespace lrCalculator{
             {
                 case TokenKind.Add_op:return new AddOpSyntax(reducerIterator.Current);
                 case TokenKind.Mult_op :return new MultiOpSyntax(reducerIterator.Current);
-                case TokenKind.Factor:{ 
+                case TokenKind.Division_op :return new DivisionOpSyntax(reducerIterator.Current);
+                case TokenKind.Unit:{
                     var l=reducerIterator.Current;reducerIterator.MoveNext();
                     var m=reducerIterator.Current;reducerIterator.MoveNext();
                     var r=reducerIterator.Current;
                     if(m==null)
-                        return new FactorSyntax(l);     
+                        return new UnitSyntax(l);     
+                    return new UnitSyntax(l,m,r);
+                };
+                case TokenKind.Factor:{ 
+                    var l=reducerIterator.Current;reducerIterator.MoveNext();
+                    var m=reducerIterator.Current;reducerIterator.MoveNext();
+                    var r=reducerIterator.Current;
                     return new FactorSyntax(l,m,r);
                 };
                 case TokenKind.Term: {

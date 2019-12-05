@@ -29,6 +29,8 @@ namespace lrCalculator
         Accepted,
         Invalid,
         EndOfFile,
-        WhiteSpace
+        WhiteSpace,
+        Unit,
+        Division_op
     }
 }

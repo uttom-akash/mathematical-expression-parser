@@ -15,17 +15,17 @@ namespace lrCalculator{
 
             Lexer lexer=new Lexer(text);
             List<SyntaxToken> tokens=lexer.Lex();
+            // tokens.Reverse();
             tokens.Add(new SyntaxToken(TokenKind.Dollar,'$'));
 
             TreeGenerator treeGenerator=new TreeGenerator(parseTable,tokens,grammar);
             var tree=treeGenerator.generateTree();
             
-            Print.PrintHeader("Result");
-            Console.WriteLine(Evaluator.Evaluate(tree));
-
             if(ShowStats.showParseTree)
                 Print.PrintTree(tree);
             
+            Print.PrintHeader("Result");
+            Console.WriteLine(Evaluator.Evaluate(tree,false));
             
 
             Console.WriteLine("\n         End           \n\n");
