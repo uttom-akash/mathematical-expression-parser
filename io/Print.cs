@@ -202,6 +202,10 @@ namespace lrCalculator{
                         MultiOpSyntax multi=current as MultiOpSyntax;
                         tree.Push(new TreeState(multi.Operator,childIndent,true));
                         };break;
+                    case TokenKind.Division_op:{
+                        DivisionOpSyntax div=current as DivisionOpSyntax;
+                        tree.Push(new TreeState(div.Operator,childIndent,true));
+                        };break;    
                     default:break;
                     
                 }
