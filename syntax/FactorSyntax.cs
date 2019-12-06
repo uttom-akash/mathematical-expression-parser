@@ -2,19 +2,18 @@ namespace lrCalculator
 {
     public class FactorSyntax:Syntax
     {
-        public FactorSyntax(Syntax number):base(TokenKind.Factor){
-            Number = number;
+       public FactorSyntax(Syntax unit):this(null,null,unit){
+
+        }
+        public FactorSyntax(Syntax unit,Syntax division,Syntax factor):base(TokenKind.Factor)
+        {
+            Unit = unit;
+            Division = division;
+            Factor = factor;
         }
 
-        public FactorSyntax(Syntax leftParenthesis,Syntax expression,Syntax rightParenthesis):base(TokenKind.Factor){
-            LeftParenthesis = leftParenthesis;
-            Expression = expression;
-            RightParenthesis = rightParenthesis;
-        }
-
-        public Syntax Number { get; }
-        public Syntax LeftParenthesis { get; }
-        public Syntax Expression { get; }
-        public Syntax RightParenthesis { get; }
+        public Syntax Unit { get; }
+        public Syntax Division { get; }
+        public Syntax Factor { get; }
     }
 }

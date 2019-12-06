@@ -132,11 +132,13 @@ namespace lrCalculator{
                 var marker=currentSyntax.IsLast ? "└──":"├──";
                 
                 Console.Write($"{indent}{marker}");
-                if(currentSyntax.IsLast)
-                    Console.ForegroundColor=ConsoleColor.Red;
-                else 
-                    Console.ForegroundColor=ConsoleColor.Cyan;
-                Console.WriteLine(current.Kind);
+                
+                Console.ForegroundColor=ConsoleColor.DarkCyan;
+                Console.Write(current.Kind);
+
+                if(current.Value!=null)
+                    Console.Write($" {current.Value}");
+                Console.WriteLine();
                 Console.ResetColor();
 
                 switch (current.Kind)
@@ -145,7 +147,18 @@ namespace lrCalculator{
                     // when pushing to the stack 
                     // pushing inverse order of grammar 
                     // cause last item should be printed at last
+                    case TokenKind.Expression:{
+                        ExpressionSyntax expression=current as ExpressionSyntax;
+                        if(expression.AddOp!=null){
+                            tree.Push(new TreeState(expression.Expression,childIndent,true));
+                            tree.Push(new TreeState(expression.AddOp,childIndent,false));
+                            tree.Push(new TreeState(expression.Term,childIndent,false));
+                            
+                        }else if(expression.Term!=null)
+                            tree.Push(new TreeState(expression.Term,childIndent,true));
+                        
 
+                    };break;
                     case TokenKind.Term:{
                         TermSyntax term=current as TermSyntax;
                         if(term.Multiply!=null){
@@ -159,27 +172,27 @@ namespace lrCalculator{
                     };break;
                     case TokenKind.Factor:{
                         FactorSyntax factor=current as FactorSyntax;
-                        
-                        if(factor.Number!=null){
-                            tree.Push(new TreeState(factor.Number,childIndent,true));
-                        }else if(factor.LeftParenthesis!=null){
-                            tree.Push(new TreeState(factor.RightParenthesis,childIndent,true));
-                            tree.Push(new TreeState(factor.Expression,childIndent,false));
-                            tree.Push(new TreeState(factor.LeftParenthesis,childIndent,false));
+                        if(factor.Division!=null){
+                            tree.Push(new TreeState(factor.Factor,childIndent,true));
+                            tree.Push(new TreeState(factor.Division,childIndent,false));
+                            tree.Push(new TreeState(factor.Unit,childIndent,false));
+                        }
+                        else if(factor.Unit!=null){
+                            tree.Push(new TreeState(factor.Unit,childIndent,true));
                         }
                     };break;
-                    case TokenKind.Expression:{
-                        ExpressionSyntax expression=current as ExpressionSyntax;
-                        if(expression.AddOp!=null){
-                            tree.Push(new TreeState(expression.Expression,childIndent,true));
-                            tree.Push(new TreeState(expression.AddOp,childIndent,false));
-                            tree.Push(new TreeState(expression.Term,childIndent,false));
-                            
-                        }else if(expression.Term!=null)
-                            tree.Push(new TreeState(expression.Term,childIndent,true));
+                    case TokenKind.Unit:{
+                        UnitSyntax unit=current as UnitSyntax;
                         
-
+                        if(unit.Number!=null){
+                            tree.Push(new TreeState(unit.Number,childIndent,true));
+                        }else if(unit.LeftParenthesis!=null){
+                            tree.Push(new TreeState(unit.RightParenthesis,childIndent,true));
+                            tree.Push(new TreeState(unit.Expression,childIndent,false));
+                            tree.Push(new TreeState(unit.LeftParenthesis,childIndent,false));
+                        }
                     };break;
+                    
                     case TokenKind.Add_op:{
                         AddOpSyntax add=current as AddOpSyntax;
                         tree.Push(new TreeState(add.Operator,childIndent,true));

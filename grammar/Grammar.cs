@@ -17,8 +17,6 @@ namespace lrCalculator
         public List<GrammarToken> TerminalTokens { get; private set; }
         public List<GrammarToken> NonTerminalTokens { get; private set; }
 
-         
-
         private void init(){
             GrammarList=GetGrammarList();
             GrammarDictionary=GetGrammarDictionary();
@@ -56,9 +54,11 @@ namespace lrCalculator
             GrammarList.Add(new Production(Term,new CompositeGrammarToken(new List<GrammarToken>{Factor})));
             GrammarList.Add(new Production(Term,new CompositeGrammarToken(new List<GrammarToken>{Factor,Mult_op,Term})));
 
-
-            GrammarList.Add(new Production(Factor,new CompositeGrammarToken(new List<GrammarToken>{Number})));
-            GrammarList.Add(new Production(Factor,new CompositeGrammarToken(new List<GrammarToken>{LeftParenthesis,Expression,RightParenthesis})));
+            GrammarList.Add(new Production(Factor,new CompositeGrammarToken(new List<GrammarToken>{Unit})));
+            GrammarList.Add(new Production(Factor,new CompositeGrammarToken(new List<GrammarToken>{Unit,Devision_op,Factor})));
+            
+            GrammarList.Add(new Production(Unit,new CompositeGrammarToken(new List<GrammarToken>{Number})));
+            GrammarList.Add(new Production(Unit,new CompositeGrammarToken(new List<GrammarToken>{LeftParenthesis,Expression,RightParenthesis})));
             
 
 
@@ -81,7 +81,7 @@ namespace lrCalculator
             
             
             GrammarList.Add(new Production(Mult_op,new CompositeGrammarToken(new List<GrammarToken>{Star})));
-            GrammarList.Add(new Production(Mult_op,new CompositeGrammarToken(new List<GrammarToken>{Slash})));
+            GrammarList.Add(new Production(Devision_op,new CompositeGrammarToken(new List<GrammarToken>{Slash})));
             
             return GrammarList;   
         }
@@ -140,8 +140,11 @@ namespace lrCalculator
         private GrammarToken Expression=new GrammarToken(TokenKind.Expression,false,"exp");
         private GrammarToken Term=new GrammarToken(TokenKind.Term,false,"term");
         private GrammarToken Factor=new GrammarToken(TokenKind.Factor,false,"factor");
+
+        private GrammarToken Unit=new GrammarToken(TokenKind.Unit,false,"unit");
         private GrammarToken Add_op=new GrammarToken(TokenKind.Add_op,false,"add");
         private GrammarToken Mult_op=new GrammarToken(TokenKind.Mult_op,false,"mult");
+        private GrammarToken Devision_op=new GrammarToken(TokenKind.Division_op,false,"devision");
         
         private GrammarToken Id=new GrammarToken(TokenKind.Id,true,"id");
         private GrammarToken Number=new GrammarToken(TokenKind.Number,true,"number");
