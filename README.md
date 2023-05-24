@@ -1,4 +1,4 @@
-#### Mathematical Mxpression Parser
+#### Mathematical Expression Parser
 -   Leveraged lr parser under the hood
     -   example expression: `10 / 5 / ( 1 + 1 ) * 5` (this expression is parsed in the following expression)
 
